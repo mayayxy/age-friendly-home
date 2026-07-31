@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#10201a" />
   <title>安居适老助手</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,96 +11,78 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="bg-glow" aria-hidden="true"></div>
+  <div class="camera-app">
+    <video id="camera" class="camera-video" playsinline muted autoplay></video>
+    <canvas id="frameCanvas" hidden></canvas>
 
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-name">安居适老助手</span>
+    <div class="camera-shade" aria-hidden="true"></div>
+
+    <header class="camera-top">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">安居适老助手</span>
+      </div>
+      <p class="camera-hint" id="statusText">正在启动相机...</p>
+    </header>
+
+    <div class="viewfinder" aria-hidden="true">
+      <span class="corner tl"></span>
+      <span class="corner tr"></span>
+      <span class="corner bl"></span>
+      <span class="corner br"></span>
     </div>
-    <p class="brand-tag">给有老人的家庭，一份看得懂的居家安全指引</p>
-  </header>
 
-  <main class="shell">
-    <section class="hero">
-      <h1 class="hero-title">拍一拍家里的角落</h1>
-      <p class="hero-lead">自动提示常见跌倒、碰撞、起夜与通行风险，并给出适老化改造建议。</p>
-      <div class="hero-cta">
-        <button type="button" class="btn btn-primary" id="scrollToTool">开始评估</button>
+    <div class="camera-bottom">
+      <p class="scan-tip" id="scanTip">对准空间，静止片刻即可自动识别</p>
+      <button type="button" class="shutter" id="scanBtn" disabled>
+        <span id="scanLabel">识别</span>
+      </button>
+    </div>
+
+    <div class="permission-card" id="permissionCard" hidden>
+      <h1>需要使用相机</h1>
+      <p>请允许相机权限，对准想改造的空间后，系统会弹出适老化建议。</p>
+      <button type="button" class="btn btn-primary" id="startCamBtn">开启相机</button>
+      <p class="perm-note" id="modelHint">正在检查模型服务...</p>
+    </div>
+  </div>
+
+  <div class="sheet-mask" id="sheetMask" hidden></div>
+  <aside class="result-sheet" id="resultSheet" hidden>
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="result-head">
+      <div class="result-copy">
+        <p class="result-kicker">识别为 <span id="detectedScene">卫生间</span></p>
+        <h2 id="resultTitle">安全评分</h2>
+        <p class="result-summary" id="resultSummary"></p>
       </div>
-    </section>
-
-    <section class="tool" id="tool">
-      <div class="tool-grid">
-        <div class="capture-panel">
-          <div class="panel-head">
-            <h2>现场照片</h2>
-            <p>用手机拍照，或从相册选择家中某个区域。</p>
-          </div>
-
-          <label class="dropzone" id="dropzone" for="fileInput">
-            <input type="file" id="fileInput" accept="image/*" capture="environment" hidden />
-            <div class="dropzone-empty" id="emptyState">
-              <span class="dropzone-plus">+</span>
-              <span>点击拍照或上传图片</span>
-            </div>
-            <img id="preview" class="preview" alt="已上传的现场照片" hidden />
-          </label>
-
-          <div class="capture-actions">
-            <button type="button" class="btn btn-primary" id="pickBtn">拍照 / 选择图片</button>
-            <button type="button" class="btn btn-ghost" id="resetBtn">重置</button>
-          </div>
-        </div>
-
-        <div class="scene-panel">
-          <div class="panel-head">
-            <h2>空间类型</h2>
-            <p>演示版先手动选择空间，后续可换成自动识别。</p>
-          </div>
-
-          <div class="scene-list" id="sceneList" role="radiogroup" aria-label="空间类型"></div>
-
-          <button type="button" class="btn btn-primary btn-block" id="analyzeBtn">
-            <span id="analyzeLabel">开始评估</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="toast" id="toast" hidden></div>
-    </section>
-
-    <section class="result" id="result" hidden>
-      <div class="result-head">
-        <div>
-          <p class="result-kicker">评估结果</p>
-          <h2 id="resultTitle">卫生间安全评分</h2>
-          <p class="result-summary" id="resultSummary"></p>
-        </div>
-        <div class="score-block">
+      <div class="score-block">
+        <div class="score-row">
           <span class="score-num" id="scoreNum">0</span>
           <span class="score-unit">分</span>
-          <span class="score-badge" id="scoreBadge">建议优化</span>
         </div>
+        <span class="score-badge" id="scoreBadge">建议优化</span>
       </div>
+    </div>
 
-      <div class="result-body">
-        <div>
-          <h3>主要风险点</h3>
-          <div class="risk-list" id="riskList"></div>
-        </div>
-        <div>
-          <h3>改造建议</h3>
-          <ul class="upgrade-list" id="upgradeList"></ul>
-        </div>
+    <div class="result-body">
+      <div>
+        <h3>风险评估</h3>
+        <div class="risk-list" id="riskList"></div>
       </div>
-    </section>
-  </main>
+      <div id="unjudgableBlock" hidden>
+        <h3>图片无法判断</h3>
+        <ul class="upgrade-list" id="unjudgableList"></ul>
+      </div>
+    </div>
 
-  <footer class="footer">
-    <p>当前为演示版：风险结果按空间类型模拟生成，尚未接入真实图像识别。</p>
-  </footer>
+    <div class="sheet-actions">
+      <button type="button" class="btn btn-primary" id="rescanBtn">继续扫描</button>
+      <button type="button" class="btn btn-ghost" id="closeSheetBtn">关闭</button>
+    </div>
+  </aside>
 
+  <div class="toast" id="toast" hidden></div>
   <script src="app-web.js"></script>
 </body>
 </html>

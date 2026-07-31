@@ -1,169 +1,47 @@
-const SCENE_MAP = {
-  bathroom: {
-    label: '卫生间',
-    summary: '地面湿滑、缺少扶手和夜间照明是卫生间最常见的跌倒风险。',
-    risks: [
-      {
-        title: '湿滑地砖易摔倒',
-        level: '高风险',
-        advice: '改用防滑地砖或增加防滑垫，并保持地面及时干燥。'
-      },
-      {
-        title: '马桶和淋浴区缺少扶手',
-        level: '高风险',
-        advice: '在马桶侧边、淋浴区安装 L 型或一字扶手，辅助起身和站稳。'
-      },
-      {
-        title: '夜间照明不足',
-        level: '中风险',
-        advice: '增加感应夜灯，减少老人夜起时摸黑行走。'
-      }
-    ],
-    upgrades: [
-      '优先改造地面防滑和扶手，这是最关键的两项。',
-      '淋浴区建议改成坐式淋浴，降低久站风险。',
-      '门槛尽量做平整处理，方便助行器和轮椅通行。'
-    ]
-  },
-  bedroom: {
-    label: '卧室',
-    summary: '卧室重点关注起夜路径、床边支撑和物品收纳的便利性。',
-    risks: [
-      {
-        title: '床边到卫生间路线杂乱',
-        level: '高风险',
-        advice: '清理杂物和电线，保证夜间行走路径通畅。'
-      },
-      {
-        title: '床体过高或过低',
-        level: '中风险',
-        advice: '调整床面高度到膝盖附近，方便老人起身。'
-      },
-      {
-        title: '缺少起夜照明',
-        level: '中风险',
-        advice: '在床底、墙角或过道安装人体感应灯。'
-      }
-    ],
-    upgrades: [
-      '床边可增加助起扶手，降低起身吃力的风险。',
-      '常用物品放在伸手可及的位置，减少弯腰和踮脚。',
-      '衣柜门把手建议更换为易抓握样式。'
-    ]
-  },
-  livingroom: {
-    label: '客厅',
-    summary: '客厅常见隐患集中在地毯翘边、家具尖角和通行空间不足。',
-    risks: [
-      {
-        title: '地毯或垫子边缘翘起',
-        level: '高风险',
-        advice: '固定地毯边缘，或移除容易绊脚的装饰垫。'
-      },
-      {
-        title: '茶几和家具尖角碰撞风险高',
-        level: '中风险',
-        advice: '给尖角加装防撞条，尽量选择圆角家具。'
-      },
-      {
-        title: '通道过窄',
-        level: '中风险',
-        advice: '重新调整家具摆放，预留足够转身和助行空间。'
-      }
-    ],
-    upgrades: [
-      '沙发旁可预留扶手或稳定支撑点，帮助站起。',
-      '电视柜、边柜尽量贴墙，减少动线障碍。',
-      '地面颜色对比可更明显，帮助视力退化老人辨识边界。'
-    ]
-  },
-  kitchen: {
-    label: '厨房',
-    summary: '厨房要优先规避滑倒、烫伤和弯腰取物等高频风险。',
-    risks: [
-      {
-        title: '地面油水易打滑',
-        level: '高风险',
-        advice: '及时清理水渍油渍，并在高频区域加防滑处理。'
-      },
-      {
-        title: '常用炊具位置过高或过低',
-        level: '中风险',
-        advice: '把高频物品放在胸口到腰部之间，减少弯腰和抬手。'
-      },
-      {
-        title: '灶台附近缺少紧急操作提醒',
-        level: '中风险',
-        advice: '增加明显的燃气和电器安全提示，便于老人记忆。'
-      }
-    ],
-    upgrades: [
-      '可选缓降橱柜和大号拉手，提高开关便利性。',
-      '建议准备防烫手套和稳定的带靠背操作椅。',
-      '洗菜区和灶台区域照明要更充足。'
-    ]
-  },
-  corridor: {
-    label: '走廊/玄关',
-    summary: '走廊和玄关是老人频繁经过的区域，地面平整和扶手尤为重要。',
-    risks: [
-      {
-        title: '鞋物杂乱影响通行',
-        level: '高风险',
-        advice: '保持通道整洁，鞋柜收纳避免堆放在地面。'
-      },
-      {
-        title: '换鞋缺少稳定支撑',
-        level: '中风险',
-        advice: '设置带扶手换鞋凳，方便坐下和起身。'
-      },
-      {
-        title: '照明和墙面引导不足',
-        level: '中风险',
-        advice: '增加过道灯带和醒目的门框、台阶边缘提示。'
-      }
-    ],
-    upgrades: [
-      '长走廊可以局部增加连续扶手。',
-      '门口高差尽量做无障碍过渡。',
-      '雨天区域建议增加吸水防滑垫并固定边缘。'
-    ]
-  }
-}
-
-const SCORE_MAP = {
-  bathroom: 58,
-  bedroom: 71,
-  livingroom: 68,
-  kitchen: 62,
-  corridor: 65
-}
+const STABLE_FRAMES = 3
+const STABLE_THRESHOLD = 14
+const AUTO_COOLDOWN_MS = 5000
+const CAPTURE_MAX_SIDE = 720
+const JPEG_QUALITY = 0.68
 
 const state = {
-  imageUrl: '',
-  selectedScene: 'bathroom',
-  analyzing: false
+  stream: null,
+  analyzing: false,
+  sheetOpen: false,
+  autoEnabled: true,
+  lastAnalyzeAt: 0,
+  prevFrame: null,
+  stableCount: 0,
+  watchTimer: null,
+  analyzeStartedAt: 0
 }
 
 const els = {
-  fileInput: document.getElementById('fileInput'),
-  pickBtn: document.getElementById('pickBtn'),
-  resetBtn: document.getElementById('resetBtn'),
-  analyzeBtn: document.getElementById('analyzeBtn'),
-  analyzeLabel: document.getElementById('analyzeLabel'),
-  sceneList: document.getElementById('sceneList'),
-  emptyState: document.getElementById('emptyState'),
-  preview: document.getElementById('preview'),
-  result: document.getElementById('result'),
+  camera: document.getElementById('camera'),
+  frameCanvas: document.getElementById('frameCanvas'),
+  statusText: document.getElementById('statusText'),
+  scanTip: document.getElementById('scanTip'),
+  scanBtn: document.getElementById('scanBtn'),
+  scanLabel: document.getElementById('scanLabel'),
+  permissionCard: document.getElementById('permissionCard'),
+  startCamBtn: document.getElementById('startCamBtn'),
+  modelHint: document.getElementById('modelHint'),
+  sheetMask: document.getElementById('sheetMask'),
+  resultSheet: document.getElementById('resultSheet'),
+  detectedScene: document.getElementById('detectedScene'),
   resultTitle: document.getElementById('resultTitle'),
   resultSummary: document.getElementById('resultSummary'),
   scoreNum: document.getElementById('scoreNum'),
   scoreBadge: document.getElementById('scoreBadge'),
   riskList: document.getElementById('riskList'),
-  upgradeList: document.getElementById('upgradeList'),
-  toast: document.getElementById('toast'),
-  scrollToTool: document.getElementById('scrollToTool')
+  unjudgableBlock: document.getElementById('unjudgableBlock'),
+  unjudgableList: document.getElementById('unjudgableList'),
+  rescanBtn: document.getElementById('rescanBtn'),
+  closeSheetBtn: document.getElementById('closeSheetBtn'),
+  toast: document.getElementById('toast')
 }
+
+const motionCanvas = document.createElement('canvas')
 
 function showToast(message) {
   els.toast.hidden = false
@@ -171,155 +49,311 @@ function showToast(message) {
   clearTimeout(showToast.timer)
   showToast.timer = setTimeout(() => {
     els.toast.hidden = true
-  }, 2200)
+  }, 2600)
 }
 
-function renderScenes() {
-  els.sceneList.innerHTML = Object.entries(SCENE_MAP)
-    .map(([key, scene]) => {
-      const active = key === state.selectedScene ? 'active' : ''
-      return `<button type="button" class="scene-item ${active}" data-scene="${key}" role="radio" aria-checked="${key === state.selectedScene}">${scene.label}</button>`
-    })
-    .join('')
+function setStatus(text) {
+  els.statusText.textContent = text
 }
 
-function setImage(file) {
-  if (!file || !file.type.startsWith('image/')) {
-    showToast('请选择图片文件')
-    return
-  }
-
-  if (state.imageUrl) {
-    URL.revokeObjectURL(state.imageUrl)
-  }
-
-  state.imageUrl = URL.createObjectURL(file)
-  els.preview.src = state.imageUrl
-  els.preview.hidden = false
-  els.emptyState.hidden = true
-  els.result.hidden = true
+function setScanBusy(busy, label) {
+  state.analyzing = busy
+  els.scanBtn.disabled = busy || !state.stream
+  els.scanBtn.classList.toggle('busy', busy)
+  els.scanLabel.textContent = label
 }
 
-function resetAll() {
-  if (state.imageUrl) {
-    URL.revokeObjectURL(state.imageUrl)
-  }
-
-  state.imageUrl = ''
-  state.selectedScene = 'bathroom'
-  state.analyzing = false
-  els.fileInput.value = ''
-  els.preview.hidden = true
-  els.preview.removeAttribute('src')
-  els.emptyState.hidden = false
-  els.result.hidden = true
-  els.analyzeBtn.disabled = false
-  els.analyzeLabel.textContent = '开始评估'
-  renderScenes()
+function openSheet() {
+  state.sheetOpen = true
+  state.autoEnabled = false
+  els.sheetMask.hidden = false
+  els.resultSheet.hidden = false
 }
 
-function buildReport(sceneKey) {
-  const scene = SCENE_MAP[sceneKey] || SCENE_MAP.livingroom
-  return {
-    sceneLabel: scene.label,
-    score: SCORE_MAP[sceneKey] || 68,
-    summary: scene.summary,
-    risks: scene.risks,
-    upgrades: scene.upgrades
+function closeSheet(resumeAuto = true) {
+  state.sheetOpen = false
+  els.sheetMask.hidden = true
+  els.resultSheet.hidden = true
+  if (resumeAuto) {
+    state.autoEnabled = true
+    state.stableCount = 0
+    state.prevFrame = null
+    state.lastAnalyzeAt = Date.now()
+    setStatus('继续对准下一个空间')
+    els.scanTip.textContent = '对准后点识别，或静止片刻自动识别'
   }
 }
 
 function renderReport(report) {
-  els.result.hidden = false
+  els.detectedScene.textContent = report.sceneLabel
   els.resultTitle.textContent = `${report.sceneLabel}安全评分`
   els.resultSummary.textContent = report.summary
   els.scoreNum.textContent = String(report.score)
 
   const urgent = report.score < 60
-  els.scoreBadge.textContent = urgent ? '优先改造' : '建议尽快优化'
+  els.scoreBadge.textContent = urgent ? '优先改造' : '建议优化'
   els.scoreBadge.classList.toggle('danger', urgent)
 
-  els.riskList.innerHTML = report.risks
+  els.riskList.innerHTML = (report.risks || [])
     .map((risk) => {
-      const high = risk.level === '高风险' ? 'high' : ''
+      const levelClass =
+        risk.level === '高风险' ? 'high' : risk.level === '低风险' ? 'low' : ''
+      const suggestions = (risk.suggestions || (risk.advice ? [risk.advice] : []))
+        .map((item) => `<li>${item}</li>`)
+        .join('')
       return `
-        <article class="risk-item ${high}">
+        <article class="risk-item ${levelClass}">
           <div class="risk-top">
             <span>${risk.title}</span>
             <span class="risk-level">${risk.level}</span>
           </div>
-          <p class="risk-advice">${risk.advice}</p>
+          <p class="risk-advice">${risk.description || risk.advice || ''}</p>
+          <div class="risk-section">
+            <p class="risk-label">改造建议</p>
+            <ul class="risk-suggestions">${suggestions}</ul>
+          </div>
+          <p class="risk-benefit"><span>预期收益</span>${risk.benefit || ''}</p>
         </article>
       `
     })
     .join('')
 
-  els.upgradeList.innerHTML = report.upgrades
-    .map((item) => `<li>${item}</li>`)
-    .join('')
+  const unjudgable = report.unjudgable || []
+  if (unjudgable.length) {
+    els.unjudgableBlock.hidden = false
+    els.unjudgableList.innerHTML = unjudgable.map((item) => `<li>${item}</li>`).join('')
+  } else {
+    els.unjudgableBlock.hidden = true
+    els.unjudgableList.innerHTML = ''
+  }
 
-  els.result.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  openSheet()
 }
 
-function analyzeScene() {
-  if (!state.imageUrl) {
-    showToast('请先拍照或上传图片')
+function captureFrameBlob() {
+  const video = els.camera
+  if (!video.videoWidth || !video.videoHeight) {
+    return Promise.reject(new Error('相机尚未就绪'))
+  }
+
+  const canvas = els.frameCanvas
+  const scale = Math.min(1, CAPTURE_MAX_SIDE / Math.max(video.videoWidth, video.videoHeight))
+  canvas.width = Math.max(1, Math.round(video.videoWidth * scale))
+  canvas.height = Math.max(1, Math.round(video.videoHeight * scale))
+
+  const ctx = canvas.getContext('2d', { alpha: false })
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) reject(new Error('截图失败'))
+        else resolve(blob)
+      },
+      'image/jpeg',
+      JPEG_QUALITY
+    )
+  })
+}
+
+function sampleMotionVector() {
+  const video = els.camera
+  if (!video.videoWidth) return null
+
+  const size = 32
+  motionCanvas.width = size
+  motionCanvas.height = size
+  const ctx = motionCanvas.getContext('2d', { willReadFrequently: true, alpha: false })
+  ctx.drawImage(video, 0, 0, size, size)
+  const { data } = ctx.getImageData(0, 0, size, size)
+  const gray = new Float32Array(size * size)
+
+  for (let i = 0, j = 0; i < data.length; i += 4, j += 1) {
+    gray[j] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+  }
+  return gray
+}
+
+function frameDiff(a, b) {
+  if (!a || !b || a.length !== b.length) return 999
+  let sum = 0
+  for (let i = 0; i < a.length; i += 1) {
+    sum += Math.abs(a[i] - b[i])
+  }
+  return sum / a.length
+}
+
+async function analyzeWithModel(blob) {
+  const form = new FormData()
+  form.append('image', blob, 'scene.jpg')
+
+  const response = await fetch('/api/analyze', {
+    method: 'POST',
+    body: form
+  })
+
+  let payload = null
+  try {
+    payload = await response.json()
+  } catch {
+    payload = null
+  }
+
+  if (!response.ok) {
+    const detail = payload && payload.detail ? payload.detail : `请求失败（${response.status}）`
+    const text = typeof detail === 'string' ? detail : JSON.stringify(detail)
+    throw new Error(text.slice(0, 180))
+  }
+
+  return payload
+}
+
+function tickAnalyzeStatus() {
+  if (!state.analyzing) return
+  const sec = Math.max(1, Math.round((Date.now() - state.analyzeStartedAt) / 1000))
+  setStatus(`模型分析中… ${sec}s`)
+  els.scanTip.textContent = '主要耗时在模型识别，不是相机预览'
+}
+
+async function analyzeCurrentView(fromAuto = false) {
+  if (state.analyzing || state.sheetOpen) return
+  if (!state.stream) {
+    showToast('请先开启相机')
     return
   }
 
-  if (state.analyzing) return
+  state.analyzeStartedAt = Date.now()
+  setScanBusy(true, '识别中')
+  setStatus(fromAuto ? '画面已稳定，开始分析…' : '正在分析当前画面…')
+  els.scanTip.textContent = '主要耗时在模型识别，不是相机预览'
+  const statusTimer = setInterval(tickAnalyzeStatus, 500)
 
-  state.analyzing = true
-  els.analyzeBtn.disabled = true
-  els.analyzeLabel.textContent = '识别中...'
-
-  setTimeout(() => {
-    const report = buildReport(state.selectedScene)
+  try {
+    const blob = await captureFrameBlob()
+    const report = await analyzeWithModel(blob)
+    state.lastAnalyzeAt = Date.now()
+    setStatus('已生成改造建议')
     renderReport(report)
-    state.analyzing = false
-    els.analyzeBtn.disabled = false
-    els.analyzeLabel.textContent = '开始评估'
-  }, 1100)
+  } catch (error) {
+    const message = error && error.message ? error.message : '识别失败，请稍后重试'
+    if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+      showToast('请先运行 python server.py 启动服务')
+      setStatus('服务未连接')
+    } else {
+      showToast(message)
+      setStatus('识别失败，请重试')
+    }
+    state.autoEnabled = true
+    state.stableCount = 0
+    state.prevFrame = null
+  } finally {
+    clearInterval(statusTimer)
+    setScanBusy(false, '识别')
+    els.scanTip.textContent = '对准后点识别，或静止片刻自动识别'
+  }
+}
+
+function watchStability() {
+  clearInterval(state.watchTimer)
+  state.watchTimer = setInterval(() => {
+    if (!state.autoEnabled || state.analyzing || state.sheetOpen || !state.stream) return
+    if (Date.now() - state.lastAnalyzeAt < AUTO_COOLDOWN_MS) return
+
+    const current = sampleMotionVector()
+    if (!current) return
+
+    const diff = frameDiff(state.prevFrame, current)
+    state.prevFrame = current
+
+    if (diff < STABLE_THRESHOLD) {
+      state.stableCount += 1
+      if (state.stableCount === 2) {
+        setStatus('已对准，即将识别…')
+      }
+      if (state.stableCount >= STABLE_FRAMES) {
+        state.stableCount = 0
+        analyzeCurrentView(true)
+      }
+    } else {
+      state.stableCount = 0
+    }
+  }, 180)
+}
+
+async function startCamera() {
+  setStatus('正在请求相机权限...')
+  els.permissionCard.hidden = true
+
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('当前浏览器不支持相机')
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 720, max: 960 },
+        height: { ideal: 960, max: 1280 },
+        frameRate: { ideal: 24, max: 30 }
+      }
+    })
+
+    state.stream = stream
+    els.camera.srcObject = stream
+    els.camera.setAttribute('playsinline', 'true')
+    els.camera.muted = true
+    await els.camera.play()
+
+    els.scanBtn.disabled = false
+    // 允许马上自动识别，不再空等冷却
+    state.lastAnalyzeAt = 0
+    setStatus('对准想改造的空间')
+    els.scanTip.textContent = '建议直接点识别；静止片刻也会自动识别'
+    watchStability()
+  } catch (error) {
+    els.permissionCard.hidden = false
+    setStatus('未获得相机权限')
+    const message = error && error.name === 'NotAllowedError'
+      ? '请在浏览器设置中允许相机权限'
+      : (error && error.message) || '无法打开相机'
+    showToast(message)
+  }
+}
+
+async function checkHealth() {
+  if (!els.modelHint) return
+  try {
+    const response = await fetch('/api/health')
+    if (!response.ok) throw new Error('health failed')
+    const data = await response.json()
+    if (data.configured) {
+      els.modelHint.textContent = `已接入视觉模型：${data.model}`
+    } else {
+      els.modelHint.textContent = '服务已启动，但未配置 VISION_API_KEY'
+    }
+  } catch {
+    els.modelHint.textContent = '请先运行 python server.py'
+  }
 }
 
 function bindEvents() {
-  els.pickBtn.addEventListener('click', () => els.fileInput.click())
-  els.fileInput.addEventListener('change', (e) => {
-    const file = e.target.files && e.target.files[0]
-    if (file) setImage(file)
+  els.startCamBtn.addEventListener('click', startCamera)
+  els.scanBtn.addEventListener('click', () => analyzeCurrentView(false))
+  els.closeSheetBtn.addEventListener('click', () => closeSheet(true))
+  els.rescanBtn.addEventListener('click', () => {
+    closeSheet(true)
   })
-
-  els.sceneList.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-scene]')
-    if (!btn) return
-    state.selectedScene = btn.dataset.scene
-    renderScenes()
-  })
-
-  els.analyzeBtn.addEventListener('click', analyzeScene)
-  els.resetBtn.addEventListener('click', resetAll)
-  els.scrollToTool.addEventListener('click', () => {
-    document.getElementById('tool').scrollIntoView({ behavior: 'smooth' })
-  })
-
-  const dropzone = document.getElementById('dropzone')
-  ;['dragenter', 'dragover'].forEach((type) => {
-    dropzone.addEventListener(type, (e) => {
-      e.preventDefault()
-      dropzone.classList.add('active')
-    })
-  })
-  ;['dragleave', 'drop'].forEach((type) => {
-    dropzone.addEventListener(type, (e) => {
-      e.preventDefault()
-      dropzone.classList.remove('active')
-    })
-  })
-  dropzone.addEventListener('drop', (e) => {
-    const file = e.dataTransfer.files && e.dataTransfer.files[0]
-    if (file) setImage(file)
-  })
+  els.sheetMask.addEventListener('click', () => closeSheet(true))
 }
 
-renderScenes()
 bindEvents()
+checkHealth()
+
+if (window.isSecureContext || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  startCamera()
+} else {
+  els.permissionCard.hidden = false
+  setStatus('请通过本地服务打开页面')
+  showToast('请使用 http://127.0.0.1:8000 打开')
+}
