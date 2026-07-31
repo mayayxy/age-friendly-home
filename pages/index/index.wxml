@@ -1,0 +1,92 @@
+<view class="container page">
+  <view class="hero card">
+    <view class="hero-badge">适老化安全评估</view>
+    <view class="hero-title">拍一拍家里的角落，快速发现老人居家隐患</view>
+    <view class="hero-desc">
+      面向有老人的家庭，帮助识别常见跌倒、碰撞、起夜、通行等风险，并给出改造建议。
+    </view>
+  </view>
+
+  <view class="card section">
+    <view class="section-title">1. 上传现场图片</view>
+    <view class="section-desc">可以直接拍照，也可以从相册选择家中某个区域的图片。</view>
+
+    <view wx:if="{{imagePath}}" class="image-preview-wrap">
+      <image class="image-preview" src="{{imagePath}}" mode="aspectFill" />
+    </view>
+
+    <view wx:else class="empty-preview">
+      <view class="empty-icon">+</view>
+      <view class="empty-text">还没有上传图片</view>
+    </view>
+
+    <view class="btn-group">
+      <view class="primary-btn" bindtap="chooseImage">拍照 / 选择图片</view>
+    </view>
+  </view>
+
+  <view class="card section">
+    <view class="section-title">2. 选择空间类型</view>
+    <view class="section-desc">为了先做出演示版，当前通过空间类型辅助判断风险点。</view>
+
+    <radio-group bindchange="onSceneChange">
+      <view class="scene-list">
+        <label
+          wx:for="{{sceneOptions}}"
+          wx:key="key"
+          class="scene-item {{selectedScene === item.key ? 'scene-item-active' : ''}}"
+        >
+          <radio value="{{item.key}}" checked="{{selectedScene === item.key}}" color="#2f8f83" />
+          <text>{{item.label}}</text>
+        </label>
+      </view>
+    </radio-group>
+
+    <view class="action-row">
+      <view class="primary-btn action-btn" bindtap="analyzeScene">
+        {{analyzing ? '识别中...' : '开始评估'}}
+      </view>
+      <view class="ghost-btn action-btn" bindtap="resetAll">重置</view>
+    </view>
+  </view>
+
+  <view wx:if="{{report}}" class="card section result-card">
+    <view class="result-header">
+      <view>
+        <view class="section-title">3. 评估结果</view>
+        <view class="section-desc">{{report.sceneLabel}}安全评分 {{report.score}} 分</view>
+      </view>
+      <view class="score-tag {{report.score < 60 ? 'score-danger' : 'score-warn'}}">
+        {{report.score < 60 ? '优先改造' : '建议尽快优化'}}
+      </view>
+    </view>
+
+    <view class="summary-box">
+      <view class="summary-title">风险概览</view>
+      <view class="summary-text">{{report.summary}}</view>
+    </view>
+
+    <view class="list-title">主要风险点</view>
+    <view
+      wx:for="{{report.risks}}"
+      wx:key="title"
+      class="risk-item"
+    >
+      <view class="risk-top">
+        <view class="risk-title">{{item.title}}</view>
+        <view class="risk-level">{{item.level}}</view>
+      </view>
+      <view class="risk-advice">{{item.advice}}</view>
+    </view>
+
+    <view class="list-title">改造建议</view>
+    <view
+      wx:for="{{report.upgrades}}"
+      wx:key="*this"
+      class="upgrade-item"
+    >
+      <text class="dot"></text>
+      <text class="upgrade-text">{{item}}</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,19 @@
+{
+  "appid": "touristappid",
+  "projectname": "elder-safe-home",
+  "description": "适老化改造微信小程序原型",
+  "compileType": "miniprogram",
+  "libVersion": "3.6.5",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": false,
+    "urlCheck": false,
+    "coverView": true,
+    "showShadowRootInWxmlPanel": true,
+    "packNpmManually": false,
+    "ignoreUploadUnusedFiles": true
+  },
+  "condition": {}
+}

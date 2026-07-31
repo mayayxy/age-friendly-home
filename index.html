@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>安居适老助手</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">安居适老助手</span>
+    </div>
+    <p class="brand-tag">给有老人的家庭，一份看得懂的居家安全指引</p>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <h1 class="hero-title">拍一拍家里的角落</h1>
+      <p class="hero-lead">自动提示常见跌倒、碰撞、起夜与通行风险，并给出适老化改造建议。</p>
+      <div class="hero-cta">
+        <button type="button" class="btn btn-primary" id="scrollToTool">开始评估</button>
+      </div>
+    </section>
+
+    <section class="tool" id="tool">
+      <div class="tool-grid">
+        <div class="capture-panel">
+          <div class="panel-head">
+            <h2>现场照片</h2>
+            <p>用手机拍照，或从相册选择家中某个区域。</p>
+          </div>
+
+          <label class="dropzone" id="dropzone" for="fileInput">
+            <input type="file" id="fileInput" accept="image/*" capture="environment" hidden />
+            <div class="dropzone-empty" id="emptyState">
+              <span class="dropzone-plus">+</span>
+              <span>点击拍照或上传图片</span>
+            </div>
+            <img id="preview" class="preview" alt="已上传的现场照片" hidden />
+          </label>
+
+          <div class="capture-actions">
+            <button type="button" class="btn btn-primary" id="pickBtn">拍照 / 选择图片</button>
+            <button type="button" class="btn btn-ghost" id="resetBtn">重置</button>
+          </div>
+        </div>
+
+        <div class="scene-panel">
+          <div class="panel-head">
+            <h2>空间类型</h2>
+            <p>演示版先手动选择空间，后续可换成自动识别。</p>
+          </div>
+
+          <div class="scene-list" id="sceneList" role="radiogroup" aria-label="空间类型"></div>
+
+          <button type="button" class="btn btn-primary btn-block" id="analyzeBtn">
+            <span id="analyzeLabel">开始评估</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="toast" id="toast" hidden></div>
+    </section>
+
+    <section class="result" id="result" hidden>
+      <div class="result-head">
+        <div>
+          <p class="result-kicker">评估结果</p>
+          <h2 id="resultTitle">卫生间安全评分</h2>
+          <p class="result-summary" id="resultSummary"></p>
+        </div>
+        <div class="score-block">
+          <span class="score-num" id="scoreNum">0</span>
+          <span class="score-unit">分</span>
+          <span class="score-badge" id="scoreBadge">建议优化</span>
+        </div>
+      </div>
+
+      <div class="result-body">
+        <div>
+          <h3>主要风险点</h3>
+          <div class="risk-list" id="riskList"></div>
+        </div>
+        <div>
+          <h3>改造建议</h3>
+          <ul class="upgrade-list" id="upgradeList"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>当前为演示版：风险结果按空间类型模拟生成，尚未接入真实图像识别。</p>
+  </footer>
+
+  <script src="app-web.js"></script>
+</body>
+</html>
