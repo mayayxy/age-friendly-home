@@ -4,7 +4,7 @@ services:
   - type: web
     name: age-friendly-home
     runtime: docker
-    plan: starter
+    plan: free
     healthCheckPath: /api/health
     envVars:
       - key: VISION_API_KEY
