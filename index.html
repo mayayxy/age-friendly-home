@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#10201a" />
-  <title>安居适老助手</title>
+  <title>安居安全助手</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
   <div class="camera-app">
@@ -20,7 +20,12 @@
     <header class="camera-top">
       <div class="brand">
         <span class="brand-mark" aria-hidden="true"></span>
-        <span class="brand-name">安居适老助手</span>
+        <span class="brand-name">安居安全助手</span>
+      </div>
+      <div class="mode-switch" id="modeSwitch" role="tablist" aria-label="评估场景">
+        <button type="button" class="mode-btn active" data-mode="elder" role="tab" aria-selected="true">适老化</button>
+        <button type="button" class="mode-btn" data-mode="baby" role="tab" aria-selected="false">婴儿安全</button>
+        <button type="button" class="mode-btn" data-mode="pet" role="tab" aria-selected="false">宠物安全</button>
       </div>
       <p class="camera-hint" id="statusText">正在启动相机...</p>
     </header>
@@ -33,7 +38,7 @@
     </div>
 
     <div class="camera-bottom">
-      <p class="scan-tip" id="scanTip">对准空间，静止片刻即可自动识别</p>
+      <p class="scan-tip" id="scanTip">对准后点识别</p>
       <button type="button" class="shutter" id="scanBtn" disabled>
         <span id="scanLabel">识别</span>
       </button>
@@ -41,9 +46,9 @@
 
     <div class="permission-card" id="permissionCard" hidden>
       <h1>需要使用相机</h1>
-      <p>请允许相机权限，对准想改造的空间后，系统会弹出适老化建议。</p>
+      <p>请允许相机权限，对准想改造的空间后，系统会弹出对应场景的安全建议。</p>
       <button type="button" class="btn btn-primary" id="startCamBtn">开启相机</button>
-      <p class="perm-note" id="modelHint">正在检查模型服务...</p>
+      <p class="perm-note" id="modelHint">准备中...</p>
     </div>
   </div>
 
@@ -52,7 +57,7 @@
     <div class="sheet-handle" aria-hidden="true"></div>
     <div class="result-head">
       <div class="result-copy">
-        <p class="result-kicker">识别为 <span id="detectedScene">卫生间</span></p>
+        <p class="result-kicker"><span id="modeLabel">适老化</span> · 识别为 <span id="detectedScene">卫生间</span></p>
         <h2 id="resultTitle">安全评分</h2>
         <p class="result-summary" id="resultSummary"></p>
       </div>
@@ -61,7 +66,7 @@
           <span class="score-num" id="scoreNum">0</span>
           <span class="score-unit">分</span>
         </div>
-        <span class="score-badge" id="scoreBadge">建议优化</span>
+        <span class="score-badge" id="scoreBadge" hidden></span>
       </div>
     </div>
 
@@ -83,6 +88,6 @@
   </aside>
 
   <div class="toast" id="toast" hidden></div>
-  <script src="app-web.js"></script>
+  <script src="app-web.js?v=6"></script>
 </body>
 </html>

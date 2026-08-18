@@ -1,0 +1,10 @@
+# Cloudflare 命名隧道配置（需自有域名并已接入 Cloudflare）
+# 用法见 deploy/README.md
+
+tunnel: age-friendly-home
+credentials-file: C:\Users\Maya.yang\.cloudflared\age-friendly-home.json
+
+ingress:
+  - hostname: home.你的域名.com
+    service: http://127.0.0.1:8000
+  - service: http_status:404

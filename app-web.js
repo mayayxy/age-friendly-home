@@ -4,6 +4,12 @@ const AUTO_COOLDOWN_MS = 5000
 const CAPTURE_MAX_SIDE = 720
 const JPEG_QUALITY = 0.68
 
+const MODE_META = {
+  elder: { label: '适老化' },
+  baby: { label: '婴儿安全' },
+  pet: { label: '宠物安全' }
+}
+
 const state = {
   stream: null,
   analyzing: false,
@@ -13,7 +19,8 @@ const state = {
   prevFrame: null,
   stableCount: 0,
   watchTimer: null,
-  analyzeStartedAt: 0
+  analyzeStartedAt: 0,
+  mode: 'elder'
 }
 
 const els = {
@@ -29,6 +36,8 @@ const els = {
   sheetMask: document.getElementById('sheetMask'),
   resultSheet: document.getElementById('resultSheet'),
   detectedScene: document.getElementById('detectedScene'),
+  modeLabel: document.getElementById('modeLabel'),
+  modeSwitch: document.getElementById('modeSwitch'),
   resultTitle: document.getElementById('resultTitle'),
   resultSummary: document.getElementById('resultSummary'),
   scoreNum: document.getElementById('scoreNum'),
@@ -79,29 +88,52 @@ function closeSheet(resumeAuto = true) {
     state.stableCount = 0
     state.prevFrame = null
     state.lastAnalyzeAt = Date.now()
-    setStatus('继续对准下一个空间')
-    els.scanTip.textContent = '对准后点识别，或静止片刻自动识别'
+    setStatus('继续对准')
+    els.scanTip.textContent = '对准后点识别'
+  }
+}
+
+function setMode(mode) {
+  if (!MODE_META[mode]) return
+  state.mode = mode
+  document.querySelectorAll('.mode-btn').forEach((btn) => {
+    const active = btn.dataset.mode === mode
+    btn.classList.toggle('active', active)
+    btn.setAttribute('aria-selected', active ? 'true' : 'false')
+  })
+  els.scanTip.textContent = '对准后点识别'
+  if (!state.analyzing && !state.sheetOpen) {
+    setStatus(`当前：${MODE_META[mode].label}`)
   }
 }
 
 function renderReport(report) {
+  const modeName = report.mode || MODE_META[state.mode].label
+  const risks = report.risks || []
+  const hasRisks = risks.length > 0
+
+  if (els.modeLabel) els.modeLabel.textContent = modeName
   els.detectedScene.textContent = report.sceneLabel
-  els.resultTitle.textContent = `${report.sceneLabel}安全评分`
-  els.resultSummary.textContent = report.summary
+  els.resultTitle.textContent = hasRisks
+    ? `${report.sceneLabel}安全评分`
+    : `${report.sceneLabel}`
+  els.resultSummary.textContent = hasRisks
+    ? report.summary
+    : (report.summary || '相机范围内未识别到风险')
   els.scoreNum.textContent = String(report.score)
+  els.scoreBadge.hidden = true
+  els.scoreBadge.textContent = ''
+  els.scoreBadge.classList.remove('danger', 'ok')
 
-  const urgent = report.score < 60
-  els.scoreBadge.textContent = urgent ? '优先改造' : '建议优化'
-  els.scoreBadge.classList.toggle('danger', urgent)
-
-  els.riskList.innerHTML = (report.risks || [])
-    .map((risk) => {
-      const levelClass =
-        risk.level === '高风险' ? 'high' : risk.level === '低风险' ? 'low' : ''
-      const suggestions = (risk.suggestions || (risk.advice ? [risk.advice] : []))
-        .map((item) => `<li>${item}</li>`)
-        .join('')
-      return `
+  els.riskList.innerHTML = hasRisks
+    ? risks
+      .map((risk) => {
+        const levelClass =
+          risk.level === '高风险' ? 'high' : risk.level === '低风险' ? 'low' : ''
+        const suggestions = (risk.suggestions || (risk.advice ? [risk.advice] : []))
+          .map((item) => `<li>${item}</li>`)
+          .join('')
+        return `
         <article class="risk-item ${levelClass}">
           <div class="risk-top">
             <span>${risk.title}</span>
@@ -115,8 +147,9 @@ function renderReport(report) {
           <p class="risk-benefit"><span>预期收益</span>${risk.benefit || ''}</p>
         </article>
       `
-    })
-    .join('')
+      })
+      .join('')
+    : '<p class="empty-risk">相机范围内未识别到风险</p>'
 
   const unjudgable = report.unjudgable || []
   if (unjudgable.length) {
@@ -186,6 +219,7 @@ function frameDiff(a, b) {
 async function analyzeWithModel(blob) {
   const form = new FormData()
   form.append('image', blob, 'scene.jpg')
+  form.append('mode', state.mode)
 
   const response = await fetch('/api/analyze', {
     method: 'POST',
@@ -210,9 +244,7 @@ async function analyzeWithModel(blob) {
 
 function tickAnalyzeStatus() {
   if (!state.analyzing) return
-  const sec = Math.max(1, Math.round((Date.now() - state.analyzeStartedAt) / 1000))
-  setStatus(`模型分析中… ${sec}s`)
-  els.scanTip.textContent = '主要耗时在模型识别，不是相机预览'
+  setStatus('识别中…')
 }
 
 async function analyzeCurrentView(fromAuto = false) {
@@ -224,24 +256,24 @@ async function analyzeCurrentView(fromAuto = false) {
 
   state.analyzeStartedAt = Date.now()
   setScanBusy(true, '识别中')
-  setStatus(fromAuto ? '画面已稳定，开始分析…' : '正在分析当前画面…')
-  els.scanTip.textContent = '主要耗时在模型识别，不是相机预览'
+  setStatus('识别中…')
+  els.scanTip.textContent = '对准后点识别'
   const statusTimer = setInterval(tickAnalyzeStatus, 500)
 
   try {
     const blob = await captureFrameBlob()
     const report = await analyzeWithModel(blob)
     state.lastAnalyzeAt = Date.now()
-    setStatus('已生成改造建议')
+    setStatus('识别完成')
     renderReport(report)
   } catch (error) {
     const message = error && error.message ? error.message : '识别失败，请稍后重试'
     if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
-      showToast('请先运行 python server.py 启动服务')
+      showToast('服务未连接')
       setStatus('服务未连接')
     } else {
       showToast(message)
-      setStatus('识别失败，请重试')
+      setStatus('识别失败')
     }
     state.autoEnabled = true
     state.stableCount = 0
@@ -249,7 +281,7 @@ async function analyzeCurrentView(fromAuto = false) {
   } finally {
     clearInterval(statusTimer)
     setScanBusy(false, '识别')
-    els.scanTip.textContent = '对准后点识别，或静止片刻自动识别'
+    els.scanTip.textContent = '对准后点识别'
   }
 }
 
@@ -268,7 +300,7 @@ function watchStability() {
     if (diff < STABLE_THRESHOLD) {
       state.stableCount += 1
       if (state.stableCount === 2) {
-        setStatus('已对准，即将识别…')
+        setStatus('已对准…')
       }
       if (state.stableCount >= STABLE_FRAMES) {
         state.stableCount = 0
@@ -308,14 +340,14 @@ async function startCamera() {
     els.scanBtn.disabled = false
     // 允许马上自动识别，不再空等冷却
     state.lastAnalyzeAt = 0
-    setStatus('对准想改造的空间')
-    els.scanTip.textContent = '建议直接点识别；静止片刻也会自动识别'
+    setStatus('对准空间')
+    els.scanTip.textContent = '对准后点识别'
     watchStability()
   } catch (error) {
     els.permissionCard.hidden = false
     setStatus('未获得相机权限')
     const message = error && error.name === 'NotAllowedError'
-      ? '请在浏览器设置中允许相机权限'
+      ? '请允许相机权限'
       : (error && error.message) || '无法打开相机'
     showToast(message)
   }
@@ -327,13 +359,9 @@ async function checkHealth() {
     const response = await fetch('/api/health')
     if (!response.ok) throw new Error('health failed')
     const data = await response.json()
-    if (data.configured) {
-      els.modelHint.textContent = `已接入视觉模型：${data.model}`
-    } else {
-      els.modelHint.textContent = '服务已启动，但未配置 VISION_API_KEY'
-    }
+    els.modelHint.textContent = data.configured ? '服务已就绪' : '请先配置密钥'
   } catch {
-    els.modelHint.textContent = '请先运行 python server.py'
+    els.modelHint.textContent = '服务未连接'
   }
 }
 
@@ -345,9 +373,22 @@ function bindEvents() {
     closeSheet(true)
   })
   els.sheetMask.addEventListener('click', () => closeSheet(true))
+
+  if (els.modeSwitch) {
+    els.modeSwitch.addEventListener('click', (e) => {
+      const btn = e.target.closest('.mode-btn')
+      if (!btn || !btn.dataset.mode) return
+      if (state.analyzing) {
+        showToast('识别进行中，请稍后再切换')
+        return
+      }
+      setMode(btn.dataset.mode)
+    })
+  }
 }
 
 bindEvents()
+setMode('elder')
 checkHealth()
 
 if (window.isSecureContext || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {

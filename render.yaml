@@ -1,0 +1,17 @@
+# Render 一键部署：https://render.com → New → Blueprint
+# 部署后得到固定地址，例如 https://age-friendly-home.onrender.com
+services:
+  - type: web
+    name: age-friendly-home
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: VISION_API_KEY
+        sync: false
+      - key: VISION_BASE_URL
+        value: https://llmapi.paratera.com/v1
+      - key: VISION_MODEL
+        value: ERNIE-4.5-Turbo-VL-32K
+      - key: PORT
+        value: "8000"

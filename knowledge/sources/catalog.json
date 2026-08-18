@@ -1,0 +1,94 @@
+{
+  "updated_at": "2026-08-13",
+  "note": "以下为可公开检索到的来源元数据。国家标准全文多数需正式渠道获取；已下载的本地文件放在本目录。",
+  "sources": [
+    {
+      "id": "mzt-218-2024",
+      "title": "MZ/T 218—2024 老年人居家环境适老化改造通用要求",
+      "priority": 1,
+      "mode": "elder",
+      "publisher": "民政部",
+      "status": "现行",
+      "publish_date": "2024-06-28",
+      "implement_date": "2024-08-01",
+      "official_info": "https://hbba.sacinfo.org.cn/",
+      "local_files": ["MZ_T_218_2024_alt.pdf", "MZ_T_218_2024.txt"],
+      "access": "已下载公开 PDF 并抽取文本"
+    },
+    {
+      "id": "mohurd-city-home-handbook-2023",
+      "title": "城市居家适老化改造指导手册",
+      "priority": 1,
+      "mode": "elder",
+      "publisher": "住房和城乡建设部城市建设司",
+      "publish_date": "2023-05",
+      "official_info": "https://app.www.gov.cn/govdata/gov/202305/31/502577/article.html",
+      "mirror": "https://jst.nx.gov.cn/zzb/gzwj_72355/202306/t20230613_4143757.html",
+      "local_files": [],
+      "access": "官网有介绍；宁夏住建厅提供附件下载入口（直链可能变动）",
+      "summary": "覆盖通用性改造、入户、起居厅、卧室、卫生间、厨房、阳台共7类47项；分基础型/提升型"
+    },
+    {
+      "id": "beijing-existing-housing-guide",
+      "title": "既有住宅适老化改造设计指南（北京）",
+      "priority": 1,
+      "mode": "elder",
+      "publisher": "北京市规划和自然资源委员会",
+      "official_info": "https://ghzrzyw.beijing.gov.cn/",
+      "local_files": ["beijing_existing_housing_guide.pdf"],
+      "access": "已下载公开宣贯/指南 PDF",
+      "note": "地方指南，适用于北京城镇住宅；可作为既有住宅改造参考"
+    },
+    {
+      "id": "nhc-infant-injury-2021",
+      "title": "托育机构婴幼儿伤害预防指南（试行）",
+      "priority": 2,
+      "mode": "baby",
+      "publisher": "国家卫生健康委办公厅",
+      "doc_no": "国卫办人口函〔2021〕19号",
+      "publish_date": "2021-01-12",
+      "local_files": ["infant_injury_prevention_guide.txt"],
+      "access": "已保存公开转载全文要点",
+      "summary": "覆盖窒息、跌倒伤、烧烫伤、溺水、中毒、异物伤害等环境改善要求"
+    },
+    {
+      "id": "gb-t-31179-2014",
+      "title": "GB/T 31179-2014 儿童安全与健康一般指南",
+      "priority": 2,
+      "mode": "baby",
+      "publisher": "国家标准委",
+      "status": "现行",
+      "official_info": "https://ndls.cnis.ac.cn/standard/detail/44ade08066497cf156a0121220e9a1c5",
+      "local_files": [],
+      "access": "需国家标准馆/正式渠道获取全文；此前误称“危险预警 家庭”已纠正"
+    },
+    {
+      "id": "gb-t-43839-2024",
+      "title": "GB/T 43839-2024 伴侣动物（宠物）用品安全技术要求",
+      "priority": 3,
+      "mode": "pet",
+      "publisher": "国家市场监督管理总局 / 国家标准委",
+      "status": "现行",
+      "publish_date": "2024-03-15",
+      "implement_date": "2024-10-01",
+      "official_info": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=10E4B1D17788D0E7F8F24D87C7278619",
+      "local_files": [],
+      "access": "官方可查元数据；全文多需付费/正式渠道",
+      "summary": "针对宠物用品分类与安全技术要求，不是居家装修规范"
+    },
+    {
+      "id": "gb-t-45204-2025",
+      "title": "GB/T 45204-2025 宠物经营场所环境清洁与消毒指南",
+      "priority": 3,
+      "mode": "pet",
+      "publisher": "国家市场监督管理总局 / 国家标准委",
+      "status": "现行/已发布",
+      "publish_date": "2025-01-24",
+      "implement_date": "2025-08-01",
+      "official_info": "https://std.samr.gov.cn/gb/search/gbDetailedCNF?id=2D5D2D0FF70831E0E06397BE0A0A126F",
+      "local_files": [],
+      "access": "官方可查元数据；适用范围是宠物经营场所清洁消毒，不是家庭装修规范",
+      "summary": "经营场所环境清洁与消毒；居家养宠场景仅可作间接参考"
+    }
+  ]
+}

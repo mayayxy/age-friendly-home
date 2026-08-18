@@ -1,0 +1,16 @@
+.env
+.env.*
+__pycache__/
+*.pyc
+.git/
+.gitignore
+pages/
+app.js
+app.json
+app.wxss
+project.config.json
+sitemap.json
+utils/
+knowledge/sources/*.pdf
+start.bat
+README.md
