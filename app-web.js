@@ -14,6 +14,7 @@ const state = {
   stream: null,
   analyzing: false,
   sheetOpen: false,
+  frozen: false,
   autoEnabled: true,
   lastAnalyzeAt: 0,
   prevFrame: null,
@@ -25,6 +26,7 @@ const state = {
 
 const els = {
   camera: document.getElementById('camera'),
+  freezeFrame: document.getElementById('freezeFrame'),
   frameCanvas: document.getElementById('frameCanvas'),
   statusText: document.getElementById('statusText'),
   scanTip: document.getElementById('scanTip'),
@@ -79,11 +81,50 @@ function openSheet() {
   els.resultSheet.hidden = false
 }
 
+function freezePreview() {
+  const video = els.camera
+  const canvas = els.freezeFrame
+  if (!video || !canvas || !video.videoWidth || !video.videoHeight) return
+
+  canvas.width = video.videoWidth
+  canvas.height = video.videoHeight
+  const ctx = canvas.getContext('2d', { alpha: false })
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+  canvas.hidden = false
+  video.classList.add('is-frozen')
+  video.pause()
+  state.frozen = true
+}
+
+function unfreezePreview() {
+  if (!state.frozen && (!els.freezeFrame || els.freezeFrame.hidden)) return
+
+  if (els.freezeFrame) els.freezeFrame.hidden = true
+  els.camera.classList.remove('is-frozen')
+  if (state.stream) {
+    els.camera.play().catch(() => {})
+  }
+  state.frozen = false
+}
+
+function waitForVideoFrame() {
+  const video = els.camera
+  return new Promise((resolve) => {
+    if (video && typeof video.requestVideoFrameCallback === 'function') {
+      video.requestVideoFrameCallback(() => resolve())
+      return
+    }
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  })
+}
+
 function closeSheet(resumeAuto = true) {
   state.sheetOpen = false
   els.sheetMask.hidden = true
   els.resultSheet.hidden = true
   if (resumeAuto) {
+    // 关闭结果后仍保持定格，直到用户再次点识别 / 自动识别触发
     state.autoEnabled = true
     state.stableCount = 0
     state.prevFrame = null
@@ -254,6 +295,15 @@ async function analyzeCurrentView(fromAuto = false) {
     return
   }
 
+  // 开始新一轮识别：恢复实时画面取新帧，再定格
+  unfreezePreview()
+  try {
+    await els.camera.play()
+  } catch {
+    /* ignore */
+  }
+  await waitForVideoFrame()
+
   state.analyzeStartedAt = Date.now()
   setScanBusy(true, '识别中')
   setStatus('识别中…')
@@ -262,11 +312,13 @@ async function analyzeCurrentView(fromAuto = false) {
 
   try {
     const blob = await captureFrameBlob()
+    freezePreview()
     const report = await analyzeWithModel(blob)
     state.lastAnalyzeAt = Date.now()
     setStatus('识别完成')
     renderReport(report)
   } catch (error) {
+    unfreezePreview()
     const message = error && error.message ? error.message : '识别失败，请稍后重试'
     if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
       showToast('服务未连接')
@@ -288,7 +340,7 @@ async function analyzeCurrentView(fromAuto = false) {
 function watchStability() {
   clearInterval(state.watchTimer)
   state.watchTimer = setInterval(() => {
-    if (!state.autoEnabled || state.analyzing || state.sheetOpen || !state.stream) return
+    if (!state.autoEnabled || state.analyzing || state.sheetOpen || state.frozen || !state.stream) return
     if (Date.now() - state.lastAnalyzeAt < AUTO_COOLDOWN_MS) return
 
     const current = sampleMotionVector()
@@ -368,10 +420,12 @@ async function checkHealth() {
 function bindEvents() {
   els.startCamBtn.addEventListener('click', startCamera)
   els.scanBtn.addEventListener('click', () => analyzeCurrentView(false))
-  els.closeSheetBtn.addEventListener('click', () => closeSheet(true))
   els.rescanBtn.addEventListener('click', () => {
     closeSheet(true)
+    unfreezePreview()
+    setStatus('对准空间')
   })
+  els.closeSheetBtn.addEventListener('click', () => closeSheet(true))
   els.sheetMask.addEventListener('click', () => closeSheet(true))
 
   if (els.modeSwitch) {

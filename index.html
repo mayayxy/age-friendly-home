@@ -8,11 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=6" />
 </head>
 <body>
   <div class="camera-app">
     <video id="camera" class="camera-video" playsinline muted autoplay></video>
+    <canvas id="freezeFrame" class="camera-freeze" hidden aria-hidden="true"></canvas>
     <canvas id="frameCanvas" hidden></canvas>
 
     <div class="camera-shade" aria-hidden="true"></div>
@@ -88,6 +89,6 @@
   </aside>
 
   <div class="toast" id="toast" hidden></div>
-  <script src="app-web.js?v=6"></script>
+  <script src="app-web.js?v=7"></script>
 </body>
 </html>

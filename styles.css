@@ -44,7 +44,8 @@ body {
   background: #0d1612;
 }
 
-.camera-video {
+.camera-video,
+.camera-freeze {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -54,9 +55,19 @@ body {
   transform: scaleX(1);
 }
 
+.camera-video.is-frozen {
+  visibility: hidden;
+}
+
+.camera-freeze {
+  z-index: 1;
+  pointer-events: none;
+}
+
 .camera-shade {
   position: absolute;
   inset: 0;
+  z-index: 2;
   background:
     linear-gradient(180deg, rgba(8, 16, 12, 0.72) 0%, rgba(8, 16, 12, 0.12) 22%, transparent 38%),
     linear-gradient(0deg, rgba(8, 16, 12, 0.82) 0%, rgba(8, 16, 12, 0.2) 28%, transparent 46%);
